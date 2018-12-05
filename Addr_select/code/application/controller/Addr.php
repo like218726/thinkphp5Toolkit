@@ -36,6 +36,7 @@ class Addr extends Base {
 			$city_arr = Db::name('address')
 						->field('code,region_name')
 					    ->where(['region_type'=>'1'])
+					    ->cache()
 						->select();
 			$el_id = "sel_city".$tag."_v1";
 			$html_str .= "<select lay-ignore id='{$el_id}' name='{$el_id}' style='width:80px;margin-right: 5px;display:inline;' onchange='sel_city_change(this)' level='1'>";
@@ -62,6 +63,7 @@ class Addr extends Base {
 			$city_arr = Db::name('address')
 						->field('code,region_name')
 					    ->where(['parent_code'=>$city_code])
+					    ->cache()
 						->select();
 			$has_data = empty($city_arr) ? -1 : 1;
 		}
@@ -79,6 +81,7 @@ class Addr extends Base {
 	public function getRegionNameByCode($code) {
 		$result = Db::name('address')
 				->where(['code'=>trim($code)])
+				->cache()
 				->find();
 		return !empty($result) ? $result['region_name']	: '';	
 	}
