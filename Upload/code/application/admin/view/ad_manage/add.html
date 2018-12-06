@@ -1,0 +1,443 @@
+{include file="public/base" /}
+{include file="public/datetime" /}
+<script type="text/javascript" src="/js/city.js"></script>
+<link href="/video/css/video-js.min.css" rel="stylesheet">
+{block name="main"}
+    <fieldset class="layui-elem-field">
+        <legend>广告列表 - {$row['id'] ? '编辑' : '新增'}广告</legend>
+        <div class="layui-field-box">
+            <form class="layui-form" action="">
+                {if condition="isset($row['id'])"}
+                    <input type="hidden" name="id" value="{$row['id']}">
+                {/if}
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span style="color:red">*</span> 广告名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="name" required value="{$row['name'] ? $row['name'] : ''}" lay-verify="required" placeholder="请输入广告名称" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><span style="color:red">*</span> 广告类型</label>
+                    <div class="layui-input-block">
+                    	<select name="type" style="width: 150px;" lay-filter="type" lay-ignore id="type" lay-verify="required">
+                    		{foreach name="type" item="vo"}
+							{if condition="isset($row['type'])"}
+							<option value="{$key}" {if $row.type eq $key}selected{/if}>{$vo}</option>
+							{else /}
+							<option value="{$key}">{$vo}</option>
+							{/if}
+							{/foreach}
+                    	</select>
+					</div>
+				</div>
+				<div class="layui-form-item" id="upload_vedio_div" {if condition="isset($row['type'])"}{if $row['type'] eq 1}style="display:none;"{else}{/if}{else /}style="display:none;"{/if}>
+					<label class="layui-form-label"><span style="color:red">*</span> 视频文件</label>
+                    <div class="layui-input-block">
+                        <input type="file" name="file" id="uploadFile" lay-type="video" class="layui-upload-file">
+                        <input type="text" name="video_src" id="image_path" style="border: none; width: 0">
+                        <video id="my-video" class="video-js" controls preload="auto" width="600" height="300"
+							  poster="/video/image/m.jpg" data-setup="{}">
+					        <source id="image" src="http://vjs.zencdn.net/v/oceans.mp4" type="video/mp4">
+					    	<source src="" type="video/webm">
+					    	<source src="" type="video/ogg">
+					        <p class="vjs-no-js"> To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a> </p>
+					      </video>																		
+						<span style="color:red;">最大允许上传50M</span> 
+					</div>
+				</div>	
+				<div class="layui-form-item" id="upload_image_div" {if condition="isset($row['type'])"}{if $row['type'] eq 1}style="display:none;"{else}{/if}{else /}style="display:none;"{/if}>
+					<label class="layui-form-label"><span style="color:red">*</span> 封面图片</label>
+                    <div class="layui-input-block">
+                        <input type="file" name="file" id="uploadFile2" class="layui-upload-file">
+                        <input type="text" name="image_src" id="image_path2" style="border: none; width: 0">
+                        <img src="" style = "width:200px;" id="image2">  
+						<span style="color:red;">最大允许上传50M</span>    
+					</div>
+				</div>
+				<div class="layui-form-item" id="upload_img_div" {if condition="isset($row['type'])"}{if $row['type'] eq 2}style="display:none;"{else}{/if}{else /}{/if}>
+					<label class="layui-form-label"><span style="color:red">*</span> 图片地址</label>
+                    <div class="layui-input-block">
+                        <input type="file" name="file" id="uploadFile3" class="layui-upload-file">
+                        <input type="text" name="img_src" id="image_path3" style="border: none; width: 0">
+                        <img src="" style = "width:200px;" id="image3">
+						<span style="color:red;">最大允许上传50M</span> 
+					</div>
+				</div>
+				<div class="layui-form-item">
+                    <label class="layui-form-label"><span style="color:red">*</span> 广告有效期</label>
+                    <div class="layui-input-block">
+                        <input type="text" id="validity_time" name="validity_time" required value="{$row['validity_time'] ? $row['validity_time'] : ''}" lay-verify="required" placeholder="请输入广告有效期" class="layui-input">
+                    </div>
+                </div>
+				<div class="layui-form-item">
+                    <label class="layui-form-label"><span style="color:red">*</span> 广告播放排序</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="sort" required value="{$row['sort'] ? $row['sort'] : ''}" lay-verify="required" placeholder="请输入广告播放排序" class="layui-input">
+                    </div>
+                </div>
+				<div class="layui-form-item">
+                    <label class="layui-form-label"><span style="color:red">*</span> 选择投放设备</label>
+                    <div class="layui-input-block">
+                        <span class="layui-btn select">请选择投放设备</span>
+                        <table class="layui-table" id="list-admin" lay-even>
+                            <thead>
+                            <tr>
+                                <th>投放设备编号</th>
+                                <th>设备管理员</th>
+								<th>设备所在地</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody id="musics">   
+							{notempty name="list"}                        	
+                            {volist name='list' id='vo'}
+                            <tr>
+                                <input type="hidden" name="ids[]" value="{$row.device_code}">
+                                <td>{$vo.code}</td>
+                                <td>{$vo.device_admin}</td>
+								<td>{$vo.address}</td>
+                                <td><span class="layui-btn layui-btn-danger del" data-info="你确定删除该设备么？">删除</span></td>
+                            </tr>
+                            {/volist}			
+							{/notempty}				
+                            </tbody>
+                        </table>				
+                    </div>
+                </div>				
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit lay-filter="admin-form">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </fieldset>
+{/block}
+{block name="myScript"}
+    <script>
+        layui.use('form', function(){
+            var form = layui.form();
+            $(document).on('click', '.select', function () {
+                var id = $("input[name='id']").val();  
+                var ids_obj = $("input[name='ids[]']");
+                var ids = [];
+                for(var i=0; i<ids_obj.length; i++)
+                {
+                    if($(ids_obj[i]).val() != '')
+                    {
+                        ids.push($(ids_obj[i]).val());
+                    }
+                }
+
+                layer.open({
+                    type: 2,
+                    area: ['100%', '100%'],
+                    maxmin: true,
+                    content: '/ad_manage/getDeviceList?ids='+ids,
+                    btn: ['提交', '取消'],
+                    yes: function (index, layero) {
+                        var body = layer.getChildFrame('body', index);
+                        //按钮【按钮一】的回调
+                        var music_obj = body.find("input[name='mid[]']:checked");
+
+                        if (music_obj.length == 0) {
+                            tips('请选择投放设备');
+                            return;
+                        }
+
+                        var string = "";
+                        for(var i=0; i<music_obj.length; i++)
+                        {
+                            var music_id = music_obj.eq(i).val();
+                            var name = music_obj.eq(i).attr('title');
+							var device_admin = music_obj.eq(i).attr('device_admin');
+							var device_address = music_obj.eq(i).attr('device_address');
+                            string += '<tr>';
+//                            string += '<input type="hidden" name="ids[]" value="' + music_id + '">';
+							string += '<input type="hidden" name="ids[]" value="' + name + '">';
+                            string += '<td>' + name + '</td>';
+                            string += '<td>' + device_admin + '</div>';
+							string += '<td>' + device_address +'</div>';
+                            string += '<td><span class="layui-btn layui-btn-danger del" data-info="你确定删除该投放设备么？">删除</span></td>';
+                            string += '</tr>';
+                        }
+
+                        $("#musics").append(string);
+                        layer.close(layer.index);
+                    }
+                });
+            });
+
+            $(document).on('click', '.del', function () {
+                $(this).parent().parent().remove();
+            });
+
+        });
+
+        function tips(msg) {
+            layer.msg(msg, {
+                icon: 5,
+                shade: [0.6, '#393D49'],
+                time:1500
+            });
+        }
+    </script>
+	<script type="text/javascript">
+        var host = window.location.host;
+        var imageObj = $("#image");
+        var image_path = '{$row["video_src"] ? $row["video_src"] : ""}';
+        if (image_path != ''){
+            imageObj.attr('src','http://'+host+'/'+image_path);  //
+        }		
+        $("#image_path").val(image_path);
+        layui.use('upload', function(){
+            var options = {
+                elem: '#uploadFile',
+                url: '{:url("upload/video")}',
+                ext: 'mp4',
+				before:function(res){
+					var size = res.files[0].size;
+					if(size > 52428800){
+						layer.alert('上传不能超过50M');
+						return false;
+					}
+				},
+                success: function(res){					
+//                    console.log(res); //上传成功返回值，必须为json格式
+                    
+//					console.log(res.type);
+					
+//					console.log(res.msg);
+					
+					if (res.type) { 
+						imageObj.show();
+	                    imageObj.attr('src','http://'+host+'/'+res.image_path);
+	                    $("#image_path").val(res.image_path);
+						$("#my-video_html5_api").attr('src','http://'+host+'/'+res.image_path);
+					} else {
+						layer.alert(res.msg);
+						return false;
+					};
+                }
+            };
+            layui.upload(options);
+        });
+		
+        var imageObj2 = $("#image2");
+        var image_path2 = '{$row["image_src"] ? $row["image_src"] : ""}';
+        if (image_path2 != ''){
+            imageObj2.attr('src','http://'+host+'/'+image_path2);  //
+        }		
+        $("#image_path2").val(image_path2);
+        layui.use('upload', function(){
+            var options = {
+                elem: '#uploadFile2',
+                url: '{:url("upload/index")}',
+                ext: 'jpg|png|jpeg|gif',
+				before:function(res){
+					var size = res.files[0].size;
+					if(size > 52428800){
+						layer.alert('上传不能超过50M');
+						return false;
+					}
+				},
+                success: function(res){
+//                    console.log(res); //上传成功返回值，必须为json格式
+					if (res.type) {
+						imageObj2.show();
+	                    imageObj2.attr('src','http://'+host+'/'+res.image_path);
+	                    $("#image_path2").val(res.image_path);
+					} else {
+						layer.alert(res.msg);
+						return false;
+					}
+                }
+            };
+            layui.upload(options);
+        });		
+
+        var imageObj3 = $("#image3");
+        var image_path3 = '{$row["img_src"] ? $row["img_src"] : ""}';
+        if (image_path3 != ''){
+            imageObj3.attr('src','http://'+host+'/'+image_path3);  //
+        }		
+        $("#image_path3").val(image_path3);
+        layui.use('upload', function(){ 
+            var options = {
+                elem: '#uploadFile3',
+                url: '{:url("upload/index")}',
+                ext: 'jpg|png|jpeg|gif',
+				before:function(res){
+					var size = res.files[0].size;
+					if(size > 52428800){
+						layer.alert('上传不能超过50M');
+						return false;
+					}
+				},
+                success: function(res){
+//                    console.log(res); //上传成功返回值，必须为json格式
+					if (res.type) {
+						 imageObj3.show(); 
+	                    imageObj3.attr('src','http://'+host+'/'+res.image_path);
+	                    $("#image_path3").val(res.image_path);
+					} else {
+						layer.alert(res.msg);
+						return false;
+					}
+                }
+            };
+            layui.upload(options);
+        });	
+					
+	</script>	
+	<script type="text/javascript">
+		$("#type").change(function(){
+			var type = $("#type").val();
+			if (type == 1) {  
+				$("#upload_image_div").hide();
+				$("#upload_vedio_div").hide();
+				$("#upload_img_div").show();
+				$("#image_imgage_src").val("");
+				$("#image_video_src").val("");	
+				$("#image").removeAttr("src");		
+				$("#image2").removeAttr("src");		
+			} else {
+				$("#upload_vedio_div").show();
+				$("#upload_image_div").show();
+				$("#upload_img_div").hide();
+				$("#image_img_src").val("");
+				$("#image3").removeAttr('src')			
+			}
+		});
+//	layui.use(['layer', 'form'], function() {
+//		var form = layui.form();
+//		form.on('select(type)', function(data){
+//			if (data.value == '1') {
+//				$("#upload_image_div").show();
+//				$("#upload_vedio_div").hide();
+//				$("#upload_img_div").show();
+//				$("#image_imgage_src").val("");
+//				$("#image_video_src").val("");
+//			} else {
+//				$("#upload_vedio_div").show();
+//				$("#upload_image_div").show();
+//				$("#upload_img_div").hide();
+//				$("#image_img_src").val("");
+//			}
+//			form.render();
+//		});	
+//	});	
+	</script>
+	<script type="text/javascript">
+        $(document).ready(function() {
+            $('#validity_time').daterangepicker({
+                format:"YYYY-MM-DD HH:mm:ss",
+                singleDatePicker: false,
+                showDropdowns: true,
+                minDate:'2018-01-01',
+                maxDate:moment().add(365,'days'),
+                startDate:'2018-01-01',
+                showWeekNumbers : false, //是否显示第几周
+                timePicker : true, //是否显示小时和分钟
+                timePickerIncrement : 1, //时间的增量，单位为分钟
+                timePicker12Hour : false, //是否使用12小时制来显示时间
+                locale : {
+                    applyLabel : '确定',
+                    cancelLabel : '取消',
+                    fromLabel : '起始时间',
+                    toLabel : '结束时间',
+                    customRangeLabel : '自定义',
+                    daysOfWeek : [ '日', '一', '二', '三', '四', '五', '六' ],
+                    monthNames : [ '一月', '二月', '三月', '四月', '五月', '六月','七月', '八月', '九月', '十月', '十一月', '十二月' ],
+                    firstDay : 1
+                }
+            });
+        });			
+		
+        /**
+         * 格式化时间戳
+         * @param fmt
+         * @returns {*}
+         * @constructor
+         */
+        Date.prototype.Format = function (fmt) {
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "h+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        };
+	</script>
+    {if condition="isset($row['id'])"}
+        <script>
+            layui.use('form', function(){
+                var form = layui.form();
+                form.on('submit(admin-form)', function(data){
+                    $.ajax({
+                        type: "POST",
+                        url: '{:url("edit")}',
+                        data: data.field,
+                        success: function(msg){
+                            if( msg.code == 1 ){
+                                parent.location.reload();
+                            }else{
+                                parent.layer.msg(msg.msg, {
+                                    icon: 5,
+                                    shade: [0.6, '#393D49'],
+                                    time:1500
+                                });
+                            }
+                        }
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+        {else /}
+        <script>
+            layui.use('form', function(){
+                var form = layui.form();
+                form.on('submit(admin-form)', function(data){
+                    $.ajax({
+                        type: "POST",
+                        url: '{:url("add")}',
+                        data: data.field,
+                        success: function(msg){
+                            if( msg.code == 1 ){
+                                parent.location.reload();
+                            }else{
+                                parent.layer.msg(msg.msg, {
+                                    icon: 5,
+                                    shade: [0.6, '#393D49'],
+                                    time:1500
+                                });
+                            }
+                        }
+                    });
+                    return false;
+                });
+
+            });
+        </script>
+    {/if}
+      <script src="/video/js/video.min.js"></script> 
+      <script src="http://vjs.zencdn.net/5.19/lang/zh-CN.js"></script>
+      <script type="text/javascript">
+			var myPlayer = videojs('my-video');
+			videojs("my-video").ready(function(){
+				var myPlayer = this;
+				myPlayer.play();
+			});
+			  
+		</script> 	
+{/block}
