@@ -1,0 +1,28 @@
+CREATE TABLE `tp_member` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `username` varchar(100) CHARACTER SET utf8 DEFAULT '' COMMENT '用户名',
+  `mobile` varchar(20) CHARACTER SET utf8 DEFAULT '' COMMENT '手机号码',
+  `nickname` varchar(100) CHARACTER SET utf8 DEFAULT '' COMMENT '用户昵称',
+  `password` varchar(50) CHARACTER SET utf8 DEFAULT NULL COMMENT '密码',
+  `regTime` int(11) DEFAULT '0' COMMENT '注册时间',
+  `status` tinyint(1) DEFAULT '1' COMMENT '账号状态 0禁用 1正常',
+  `openId` varchar(80) CHARACTER SET utf8 DEFAULT '' COMMENT '微信唯一ID',
+  `unionid` varchar(80) DEFAULT '' COMMENT '联合ID',
+  `head_pic` varchar(255) CHARACTER SET utf8 DEFAULT '' COMMENT '头像',
+  `last_login` int(11) DEFAULT '0' COMMENT '最后登录时间',
+  `last_ip` varchar(15) CHARACTER SET utf8 DEFAULT '' COMMENT '最后登录ip',
+  `last_province` varchar(100) DEFAULT '' COMMENT '最后登录省份',
+  `last_city` varchar(20) CHARACTER SET utf8 DEFAULT '' COMMENT '所在城市',
+  `qrcode_img` varchar(255) CHARACTER SET utf8 DEFAULT '' COMMENT '二维码图片地址',
+  `wx_nickname` varchar(50) CHARACTER SET utf8 DEFAULT '' COMMENT '微信昵称',
+  `wx_head_pic` varchar(255) CHARACTER SET utf8 DEFAULT '' COMMENT '微信头像',
+  `wx_time` datetime DEFAULT '0000-00-00 00:00:00' COMMENT '微信授权时间',
+  `recommend` varchar(20) CHARACTER SET utf8 DEFAULT '' COMMENT '推荐人手机号',
+  `bing_phone` varchar(20) CHARACTER SET utf8 DEFAULT '' COMMENT '绑定手机',
+  `bing_time` datetime DEFAULT '0000-00-00 00:00:00' COMMENT '绑定时间',
+  `type` smallint(4) DEFAULT '10' COMMENT '类型: 10.非会员,20.会员',
+  `sex` smallint(4) DEFAULT '0' COMMENT '性别: 0.未知,1.男,2.女',
+  `free_times` int(6) DEFAULT '3' COMMENT '免费次数',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+
