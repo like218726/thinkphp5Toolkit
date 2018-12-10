@@ -11,7 +11,7 @@ class Upload extends Base{
     public function index()
     {
     	// 获取表单上传文件 例如上传了001.jpg
-		$file = request()->file('image'); 
+		$file = request()->file('file');  //不能用image,如果用了的话,validate方法不能识别,非常奇怪
 		// 移动到框架应用根目录/public/uploads/ 目录下
 		$info = $file->validate(['size'=>52428800,'ext'=>'jpg,png,gif,jpeg'])->move(ROOT_PATH . 'public' . DS . 'Uploads');
 		if($info){
