@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>视频播放</title>
+<link rel="stylesheet" href="/toolpackage/video/css/video-js.min.css">
+<script type="text/javascript" src="/toolpackage/video/js/videojs-ie8.min.js"></script>
+<script type="text/javascript" src="/toolpackage/video/js/jquery-1.8.2.min.js"></script>
+<style type="text/css">
+body,video,source,p,span,div,h1{margin:0; padding:0;}
+.my-video {margin: 0 auto; width: 1280px; padding: 300px;}
+</style>
+</head>
+<body>
+	<!-- <video id="my-video" class="video-js my-video" controls preload="auto" width="600" height="300" 
+		  poster="/toolpackage/video/image/m.jpg" data-setup="{}"> -->
+	<video id="my-video" class="video-js my-video" controls preload="auto" poster="/toolpackage/video/image/m.jpg" data-setup="{}">	  
+		<source id="image" src="http://vjs.zencdn.net/v/oceans.mp4" type="video/mp4">
+		<source src="" type="video/webm">
+		<source src="" type="video/ogg">
+		<p class="vjs-no-js"> To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a> </p>
+	</video>	
+	<script type="text/javascript" src="/toolpackage/video/js/video.min.js"></script>	
+	<script type="text/javascript" src="/toolpackage/video/js/zh-CN.js"></script>
+	<script type="text/javascript">
+		var myPlayer = videojs('my-video');
+		videojs("my-video").ready(function(){
+			var myPlayer = this;
+			myPlayer.play();
+		});		  
+	</script> 		
+</body>
+</html>
