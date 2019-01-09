@@ -1,3 +1,10 @@
+方法一:
 {$addr_select}
 
-<span class="sel_city" id="addr_select" data_city3="{$row.country_code ? $row.country_code : ''},{$row.province_code ? $row.province_code : ''},{$row.city_code ? $row.city_code : ''},{$row.area_code ? $row.area_code : ''},{$row.town_code ? $row.town_code : ''}" data_area="{$row.area_code ? $row.area_code : ''}"> 		
+方法二:
+<span class="sel_city" id="addr_select" data_city3="{$row.country_code ? $row.country_code : ''},{$row.province_code ? $row.province_code : ''},{$row.city_code ? $row.city_code : ''},{$row.area_code ? $row.area_code : ''},{$row.town_code ? $row.town_code : ''}" data_area="{$row.area_code ? $row.area_code : ''}"> 	
+
+
+<script type="text/javascript">
+	city_select('addr_select', '');
+</script>	
