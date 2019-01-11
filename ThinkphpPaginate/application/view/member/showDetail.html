@@ -1,0 +1,90 @@
+{include file="public/base" /}
+<style type="text/css">
+	.tab{
+		height: 45px;
+		border-bottom: 1px solid #0099FF;
+	}
+	.tab li {
+		line-height: 35px;
+		float: left;
+		margin-right: 10px;
+		padding: 5px;
+	}
+	.active{
+		background: #0099FF;
+		color: #FFF;
+		border-bottom: 0;
+	}
+</style>
+<block name="main">
+    <fieldset class="layui-elem-field">
+        <legend>用户列表 - 用户详情</legend>
+        <div class="layui-field-box">
+			<table class="layui-table" id="list-admin" lay-even>
+				<tr>
+					<th>用户ID：</th>
+					<td>{$row.id}</td>
+					<th>微信昵称：</th>
+					<td>{$row.wx_nickname}</td>
+					<th>手机号：</th>
+					<td>{$row.mobile}</td>
+					<th>用户身份：</th>
+					<td>{$row.type}</td>
+				</tr>
+				<tr>
+					<th>订单总数：</th>
+					<td>{$row.order_total}</td>
+					<th>退单总数：</th>
+					<td>{$row.refund_total}</td>
+					<th>消费总额（元）：</th>
+					<td>{$row.consume_total}</td>
+					<th>会员购买总额（元）：</th>
+					<td>{$row.membership_card_total}</td>
+				</tr>
+				<tr>
+					<th>绑定手机时间：</th>
+					<td>{$row.bing_time}</td>
+					<th>最后登录时间：</th>
+					<td>{$row.last_login_time}</td>
+					<th></th>
+					<td></td>
+					<th></th>
+					<td></td>
+				</tr>								
+			</table>
+			
+			<ul class="tab">
+				<li id="order_detail">订单明细</li>
+				<li id="membership_card_detail">会员卡明细</li>
+			</ul>
+			
+			<div id="order_detail_info">
+				{include file="member/orderDetail" /}
+			</div>
+			<div id="membership_card_detail_info">
+				{include file="member/membershipCardDetail" /}
+			</div>
+        </div>
+    </fieldset>
+</block>
+<block name="myScript">
+    <script>
+    	$(document).ready(function(){
+			$('#order_detail').addClass('active');
+			$('#order_detail_info').show();
+			$('#membership_card_detail_info').hide();
+		});
+		$("#order_detail").click(function(){
+			$('#order_detail').addClass('active');
+			$('#membership_card_detail').removeClass('active');
+			$('#order_detail_info').show();
+			$('#membership_card_detail_info').hide();
+		})
+		$("#membership_card_detail").click(function(){
+			$('#membership_card_detail').addClass('active');
+			$('#order_detail').removeClass('active');
+			$('#membership_card_detail_info').show();
+			$('#order_detail_info').hide()
+		})
+    </script>
+</block>

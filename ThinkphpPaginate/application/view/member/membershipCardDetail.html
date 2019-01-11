@@ -1,0 +1,47 @@
+{include file="public/base" /}
+<block name="main"> 
+    <div class="layui-field-box">
+        <table class="layui-table" id="list-admin" lay-even>
+            <thead>
+            <tr>
+                <th>操作时间</th>
+                <th>操作前额度</th>
+                <th>额度变化</th>
+                <th>操作方式</th>
+                <th>对应订单号</th>
+                <th>所属会员卡号</th>
+				<th>所属场馆</th>
+				<th>所属商户</th>
+				<th>会员卡余额</th>
+				<th>会员卡状态</th>
+            </tr>
+            </thead>
+			<tbody>
+				{notempty name="membershipcarddetail['list']"}
+				{foreach name="membershipcarddetail['list']" key='key' item='item'}
+				<tr>
+					<td>{$item.create_time}</td>
+					<td>{$item.before_amount}</td>
+					<td>{$item.current_amount}</td>
+					<td>{$item.pay_method}</td>
+					<td>{$item.member_order_no}</td>
+					<td>{$item.membership_code}</td>
+					<td>{$item.court_id}</td>
+					<td>{$item.merchant_id}</td>
+					<td>{$item.after_amount}</td>
+					<td>{$item.status}</td>
+				</tr>
+				{/foreach}
+				{else /}
+				<tr>
+					<td colspan="10">
+						没有数据
+						<input type="hidden" name="user_nick" value="{$row.user_nick}" />
+					</td>
+				</tr>
+				{/notempty}
+			</tbody>
+        </table>
+		{$membershipcarddetail['page']}
+    </div>
+</block>

@@ -1,0 +1,41 @@
+{include file="public/base" /}
+<block name="main"> 
+    <div class="layui-field-box">
+        <table class="layui-table" id="list-admin" lay-even>
+            <thead>
+            <tr>
+                <th>订单编号</th>
+                <th>所属场馆</th>
+                <th>所属商户</th>
+                <th>合计总额（元）</th>
+                <th>会员卡支付总额（元）</th>
+                <th>订单状态</th>
+				<th>支付时间</th>
+            </tr>
+            </thead>
+			<tbody>
+				{notempty name="orderdetail['list']"}
+				{foreach name="orderdetail['list']" key='key' item='item'}
+				<tr>
+					<td>{$item.order_no}</td>
+					<td>{$item.court_id}</td>
+					<td>{$item.merchant_id}</td>
+					<td>{$item.order_amount_total}</td>
+					<td>{$item.membership_card_amount_total}</td>
+					<td>{$item.order_status}</td>
+					<td>{$item.payment_time}</td>
+				</tr>
+				{/foreach}
+				{else /}
+				<tr>
+					<td colspan="7">
+						没有数据
+						<input type="hidden" name="user_nick" value="{$row.user_nick}" />
+					</td>
+				</tr>
+				{/notempty}
+			</tbody>
+        </table>
+		{$orderdetail['page']}
+    </div>
+</block>
