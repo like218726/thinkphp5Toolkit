@@ -1,8 +1,6 @@
 <?php
 namespace app\admin\controller;
 
-use think\Db;
-
 class Addr extends Base {
 	
 	/**
@@ -33,11 +31,7 @@ class Addr extends Base {
 		$level_info = array('国家','省','市','区','镇');
 		$html_str = '';
 		if ($level == 1){
-			$city_arr = Db::name('address')
-						->field('code,region_name')
-					    ->where(['region_type'=>'1'])
-					    ->cache()
-						->select();
+			$city_arr = model('Addr')->field('code,region_name')->where(['region_type'=>'1'])->select();
 			$el_id = "sel_city".$tag."_v1";
 			$html_str .= "<select lay-ignore id='{$el_id}' name='{$el_id}' style='width:80px;margin-right: 5px;display:inline;' onchange='sel_city_change(this)' level='1'>";
 			$html_str .= "<option value=''>-{$level_info[0]}-</option>";
@@ -60,11 +54,7 @@ class Addr extends Base {
 			}
 			$has_data = 1;
 		}else{
-			$city_arr = Db::name('address')
-						->field('code,region_name')
-					    ->where(['parent_code'=>$city_code])
-					    ->cache()
-						->select();
+			$city_arr = model('Addr')->field('code,region_name')->where(['parent_code'=>$city_code])->select();
 			$has_data = empty($city_arr) ? -1 : 1;
 		}
 		$result = array('has_data'=>$has_data,'data'=>$city_arr,'select_html'=>$html_str,'level'=>$level,'tag'=>$tag);
@@ -79,10 +69,7 @@ class Addr extends Base {
 	 * 
 	 */
 	public function getRegionNameByCode($code) {
-		$result = Db::name('address')
-				->where(['code'=>trim($code)])
-				->cache()
-				->find();
+		$result = Db::name('address')->where(['code'=>trim($code)])->find();
 		return !empty($result) ? $result['region_name']	: '';	
 	}
 }

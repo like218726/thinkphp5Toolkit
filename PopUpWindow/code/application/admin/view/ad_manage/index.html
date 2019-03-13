@@ -1,0 +1,98 @@
+<div class="layui-form-item">
+    <label class="layui-form-label"><span style="color:red">*</span> 选择投放设备</label>
+    <div class="layui-input-block">
+        <span class="layui-btn select">请选择投放设备</span>
+		<span style="color: red; font-size: larger;">一旦重复操作,前面的操作将清空</span>
+        <table class="layui-table" id="list-admin" lay-even>
+            <thead>
+            <tr>
+                <th>投放设备编号</th>
+                <th>设备管理员</th>
+				<th>设备所在地</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody id="musics">   
+			{notempty name="list"}                        	
+            {volist name='list' id='vo'}
+            <tr>
+                <td>{$vo.code}</td>
+                <td>{$vo.device_admin}</td>
+				<td>{$vo.address}</td>
+                <td><span class="layui-btn layui-btn-danger del" data-info="你确定删除该设备么？">删除</span></td>
+            </tr>
+            {/volist}			
+			{/notempty}				
+            </tbody>
+        </table>				
+    </div>
+</div>	
+
+<script>
+    layui.use('form', function(){
+        var form = layui.form();
+        $(document).on('click', '.select', function () {
+            var id = $("input[name='id']").val();  
+            var ids_obj = $("input[name='ids[]']");
+            var ids = [];
+            for(var i=0; i<ids_obj.length; i++)
+            {
+                if($(ids_obj[i]).val() != '')
+                {
+                    ids.push($(ids_obj[i]).val());
+                }
+            }
+            layer.open({
+                type: 2,
+                area: ['100%', '100%'],
+                maxmin: true,
+                content: '/ad_manage/getDeviceList?ids='+ids,
+                btn: ['提交', '取消'],
+                yes: function (index, layero) {
+                    var body = layer.getChildFrame('body', index);
+                    //按钮【按钮一】的回调
+                    var music_obj = body.find("input[name='mid[]']:checked");
+
+                    if (music_obj.length == 0) {
+                        tips('请选择投放设备');
+                        return;
+                    }
+
+                    var string = "";
+					var device_code = "";
+                    for(var i=0; i<music_obj.length; i++)
+                    {
+                        var music_id = music_obj.eq(i).val();
+                        var name = music_obj.eq(i).attr('title');
+						var device_admin = music_obj.eq(i).attr('device_admin');
+						var device_address = music_obj.eq(i).attr('device_address');
+						device_code += name + ',';
+                        string += '<tr>';
+                        string += '<td>' + name + '</td>';
+                        string += '<td>' + device_admin + '</div>';
+						string += '<td>' + device_address +'</div>';
+                        string += '<td><span class="layui-btn layui-btn-danger del" data-info="你确定删除该投放设备么？">删除</span></td>';
+                        string += '</tr>';
+                    }
+					$("#musics").empty();
+                    $("#musics").append(string);
+					$("#device_code").val(device_code);
+                    layer.close(layer.index);
+                }
+            });
+        });
+
+        $(document).on('click', '.del', function () {
+            $(this).parent().parent().remove();
+        });
+
+    });
+
+    function tips(msg) {
+        layer.msg(msg, {
+            icon: 5,
+            shade: [0.6, '#393D49'],
+            time:1500
+        });
+    }
+</script>

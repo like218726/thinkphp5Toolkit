@@ -26,7 +26,7 @@ class Device extends Base {
 	            $where['create_time'] = ['between',[$start_time,$end_time]];			
 			}
 
-	        $data = Db::name('device')
+	        $data = model('Device')
 					->alias('d')
 					->field('d.id as id,d.code,d.device_admin,working_status,address,use_times,use_count,aalarm_count,status,d.last_time as last_use_time,d.create_time')             
 			        ->where($where)

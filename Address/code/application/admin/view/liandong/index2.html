@@ -1,0 +1,68 @@
+{include file="public/base" /}
+<block name="main">
+    <fieldset class="layui-elem-field">
+        <legend>省市两级联动</legend>
+        <div class="layui-field-box">
+            <form class="layui-form" action="">				             						
+				<div class="layui-form-item">
+					<label class="layui-form-label">联动选择框</label>
+					<div class="layui-input-inline">
+						<select name="province" lay-filter="province">
+							<option value="">请选择省</option>
+							{if condition="isset($province)"} {
+								{foreach $province as $vo}
+									{if condition="isset($row.province_code)"}
+										{if $row.province_code eq $vo.code}
+											<option value="{$vo.code}" selected>{$vo.region_name}</option>
+										{else /}	
+											<option value="{$vo.code}">{$vo.region_name}</option>
+										{/if}
+									{/if}
+								{/foreach}							
+							{else /}
+								{foreach $data as $vo}
+									<option value="{$vo.code}">{$vo.region_name}</option>
+								{/foreach}								
+							{/if}
+						</select>
+					</div>
+					<div class="layui-input-inline">
+						<select name="city" id="city" lay-filter="city">
+							<option value="">请选择市</option>
+							{if condition="isset($city)"}
+								{foreach $city as $vo}
+									{if condition="isset($row.city_code)"}
+										{if $row.city_code eq $vo.code}
+											<option value="{$vo.code}" selected>{$vo.region_name}</option>
+										{else /}	
+											<option value="{$vo.code}">{$vo.region_name}</option>	
+										{/if}
+									{/if}
+								{/foreach}	
+							{/if}									
+						</select>
+					</div>										
+				</div>					
+            </form>
+        </div>
+    </fieldset>
+</block>
+<block name="myScript">
+    <script>
+        layui.use('form', function(){
+            var form = layui.form();
+			form.on('select(province)', function(data){
+				$.post("/Address/index", { "code": data.value, "region_type":3 }, function(data){
+					 if (data.code == '1') {
+					 	var city_html = '<option value="">请选择市</option>';
+					 	$.each(data.data,function(key,val){
+							city_html += '<option value="'+val.code+'">'+val.region_name+'</option>';
+						});
+						$('#city').html(city_html);
+						form.render();
+					 }
+				}, "json");		
+			})		
+        });
+    </script>
+</block>

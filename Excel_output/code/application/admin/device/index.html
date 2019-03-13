@@ -1,0 +1,33 @@
+<button type="submit" class="layui-btn layui-btn-normal" id="excel">导出Excel</button>
+
+var myTable = myFun();
+$('.sub').on("click", function(){
+    myTable.destroy();
+    myTable = myFun('?'+ $('#form-admin-add').serialize());
+});
+
+var myFun = function (query) {
+    query = query || '';
+    return $('#list-admin').DataTable({
+        dom: 'rt<"bottom"ifpl><"clear">',
+        ordering: false,
+        autoWidth: false,
+        searching:false,
+        serverSide: true,
+        ajax: {
+            url:'ajaxGetIndex' + query,
+            type: 'POST',
+            dataSrc: function ( json ) {
+                if( json.code == 0 ){
+                    parent.layer.msg(json.msg, {
+                        icon: 5,
+                        shade: [0.6, '#393D49'],
+                        time:1500
+                    });
+                }else{
+                    return json.data;
+                }
+            }
+        },
+    });
+};

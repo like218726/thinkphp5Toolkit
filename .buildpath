@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <buildpath>
-	<buildpathentry kind="src" path="Addr_select/code/application/admin/controller"/>
-	<buildpathentry kind="src" path="CreateToken/code/application/api/controller"/>
-	<buildpathentry kind="src" path="Excel_output/code/application/admin"/>
-	<buildpathentry kind="src" path="GetWechatPublicUserInfo/code/application/common"/>
-	<buildpathentry kind="src" path="GetWechatPublicUserInfo/code/application/controller"/>
-	<buildpathentry kind="src" path="JsSdk/code/application/api/common"/>
-	<buildpathentry kind="src" path="JsSdk/code/application/api/controller"/>
-	<buildpathentry kind="src" path="ScanDirlFile"/>
-	<buildpathentry kind="src" path="Upload/code/application/admin/controller"/>
-	<buildpathentry kind="src" path="WechatMassage/code/application/api/common"/>
-	<buildpathentry kind="src" path="WechatMassage/code/application/api/controller"/>
+	<buildpathentry kind="src" path=""/>
 	<buildpathentry kind="con" path="org.eclipse.php.core.LANGUAGE"/>
 </buildpath>
