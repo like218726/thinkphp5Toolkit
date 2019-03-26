@@ -1,104 +1,49 @@
 <?php
-/**
- * 
- * 判断是否为国内IP
- * return bool
- * 
- */
-function check_ip () {
-	ini_set('user_agent','Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30; GreenBrowser)');	
-	if(getenv("HTTP_CLIENT_IP")){
-		$ip = getenv("HTTP_CLIENT_IP");
-	}else if(getenv("HTTP_X_FORWARDED_FOR")){
-		$ip = getenv("HTTP_X_FORWARDED_FOR");
-	}else if(getenv("REMOTE_ADDR")){
-		$ip = getenv("REMOTE_ADDR");
-	}else{
-		$ip = "NULL";
-	}
-	
-	if ($ip == '127.0.0.1') {
-		return true;
-	} else {
-		$url = "http://ip.taobao.com/service/getIpInfo.php?ip=".$ip;
-		$resp = file_get_contents($url);
-		if(!empty($resp))
-		{
-			$info = json_decode($resp, true);
-			if($info['data']['country'] != '中国')
-			{
-				return false;
-			} else {
-				return true;
-			}
-		}	
-	}
-}
+
 
 /**
   * 发送验证码短信
   * @param $mobile  手机号码
-  * @param $code    验证码
+  * @param $var    替换短信内容的变量
+  * @param $template_code 模板编号
+  * @param $$sms_cfg_var 模板变量参数 code为验证码模板的变量,time为会员卡过期模板的变量
+  * @example 短信验证码 send_msg('18620888755', '648654', 'code', 'SMS_159490493')
+  * 		  会员卡过期 send_msg('18620888755', '2019-03-22-11:22:36', 'time', 'SMS_160860272')
   * @return bool    短信发送成功返回true失败返回false
   *
   * 验证码模板：${product}用户注册验证码：${code}。请勿将验证码告知他人并确认该申请是您本人操作！
   */
-function send_sms_reg( $mobile, $code)
+function send_sms( $mobile, $var, $sms_cfg_var='code', $template_code='')
 { 
 	$alicloud = config('ALICLOUD');	
-	$sms_template_code = $alicloud['TemplateCode']; //模板编号
 	$sign_name = $alicloud['SignName']; //签名名称
-	if(empty($sms_template_code) || empty($sign_name)){
-		return false;
-	}
+	if(empty($template_code) || empty($sign_name)){
+		return array(false, '-1103', '模板编号或者签名为空');
+	} 
 	$product = $alicloud['sms_product'];        
 	// 短信模板参数拼接字符串,如果模板里有$product变量就开启82行,反之83号
 //	$sms_cfg = json_encode(array('code'=>$code,'product'=>$product));  
-	$sms_cfg = json_encode(array('code'=>$code));  
+	$sms_cfg = json_encode(array($sms_cfg_var=>$var));  
 	// 发送验证码短信
-	$sms_send = sendSms($mobile, $sms_template_code, $sms_cfg, $sign_name);
+	vendor('dysms.Sms');
+	$sms = new Sms();
+
+	$sms->appkey = $alicloud['AccessKeyId'];
+	$sms->secretKey = $alicloud['AccessKeySecret'];
+
+	$sms_send = $sms->sendSms($mobile, $template_code, $sms_cfg, $sign_name);
+		
 	$success = $sms_send->Code == 'OK' ? true : false; //成功标识
 	$return_code = $sms_send->Code; //返回的编码
 	$sub_code = $sms_send->Message; //错误码
 
 	if ($success)
 	{
-		$db = model("VerificationCode"); 
-		$map = array(
-			'telphone' => $mobile,
-			'verification_code' => $code,
-			'is_used' => 0,
-			'create_time' => array('gt', time() - 10 * 60),
- 		);
-		$data = $db->where($map)->find();
-
-		// 没有就插入验证码,供验证用
-		empty($data) && $db->insert(array('telphone' => $mobile, 'verification_code' => $code, 'create_time' => time(), 'ip'=>get_client_ip()));
+		//将短信内容插入到数据库需要在调用此方法内实现
 		return array(true,'','');
 	} else {
 		return array(false,$return_code,$sub_code);
 	}
-}
-
-/**
- * 
- * 发送短信
- * @param unknown_type $mobile
- * @param unknown_type $sms_template_code
- * @param unknown_type $param_str
- * @param unknown_type $sign_name
- */
-function sendSms($mobile, $sms_template_code, $param_str, $sign_name='注册验证')
-{
-	vendor('dysms.Sms');
-	$sms = new Sms();
-
-	$alicloud = config('ALICLOUD');	
-	$sms->appkey = $alicloud['AccessKeyId'];
-	$sms->secretKey = $alicloud['AccessKeySecret'];
-
-	$res = $sms->sendSms($mobile, $sms_template_code, $param_str, $sign_name);
-	return $res;
 }
 
 /**

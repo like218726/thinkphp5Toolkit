@@ -13,67 +13,70 @@ class Message extends Controller {
 	 */
 	public function SendSms() {
 		if ($this->request->isPost()) {
+			
+			$alicloud = config('ALICLOUD');	
+			
 			$code = rand(100000, 999999);
 			$telphone = input('post.telphone','','trim');
 			
-			//判断是否存在验证码
-			$data = model("VerificationCode")->where(array('telphone'=>$telphone, 'is_used'=>0))->order('id DESC')->find();
-			//获取时间配置
-			$alicloud = config('ALICLOUD');	
-			$sms_time_out = $alicloud['sms_time_out'];
-			$sms_time_out = $sms_time_out ? $sms_time_out : 60;
-			//60秒以内不可重复发送
-			$times = intval(time()) - intval($data['create_time']);
-			if($data && ($times < $sms_time_out)){
-				return $this->ajaxError($sms_time_out.'秒内不允许重复发送');
-			}
-	
-			//屏蔽此账号
-//	        if($session_id == '1543897721000')
-//	        {
-//	            return array('status'=>-1,'msg'=>'发送失败');
-//	        }
+			//1. 手机号不能为空
 			if (!$telphone) {
-				return $this->ajaxError("手机号不能为空");
-			}  
-			if (!is_numeric($telphone)) {
-				return $this->ajaxError("手机号必须是数字");
-			}			
-			if (strlen($telphone)!=11) {
-				return $this->ajaxError("手机号必须是11位的中国大陆手机号码");
-			}			
+				return ajaxError("手机号不能为空");
+			}  			
+			
+			//2. 手机号满足130-199的手机号规则
 			if(!preg_match("/^1[3-9]{1}\d{9}$/",$telphone)){
-				return $this->ajaxError("请正确填写手机号码");
-	        }
-//			$ip_info = check_ip();
-//			if (!$ip_info) {
-//				return ajaxError('当前IP非法');
-//			}
-			$bing_count = model("User")->where('bing_phone',$telphone)->count();
-			if ($bing_count>0) {
-				return $this->ajaxError('此手机号已被绑定');
+				return ajaxError("请正确填写手机号码");
+	        }			
+			
+	        //10分钟内不允许重复发送
+			$map = array(
+				'telphone' => $telphone,
+				'verification_code' => $code,
+				'is_used' => 0,
+				'create_time' => array('gt', time() - $alicloud['valid_minute'] * 60),
+	 		);
+			$data = model("VerificationCode")->where($map)->find();			
+			
+			if ($data) {
+				return ajaxError($alicloud['valid_minute'].'分钟内不允许重复发送');
 			}
+			
+			//4. 已用户绑定的手机号不能发送
+			if($needCheck == true)
+			{
+				$user = model('User')->get(['mobile'=>$telphone,'openid'=>['<>', '']]); 
+		        if(!empty($user))
+		        {
+		            return ajaxError('手机号码已注册');
+		        }	
+			}		    
+
+	        //5. 只能在中国大陆的手机才能发送验证码
+	        Loader::import('chinaip.chinaip', EXTEND_PATH, '.class.php');  
+	        $chinaip = new \chinaip();
+	        if(!$chinaip->inChina()) {
+	        	return ajaxError('当前IP非法');
+	        }
+			
+			//6.同一IP在当天之内不能超过10次
 			$ip = get_client_ip();
-		    $count = model("VerificationCode")->where(array('ip'=>$ip, 'create_time'=>array('gt',strtotime(date('Y-m-d')))))->count();
-	        if($count >= 10)
+			$count = model("VerificationCode")->where(array('ip'=>$ip, 'create_time'=>array('gt',strtotime(date('Y-m-d')))))->count();
+	        if($count > 10)
 	        {
-	            return $this->ajaxError('您今天发送验证码的数量已超过限额！');
-	        }
+	            return ajaxError('您今天发送验证码的数量已超过10次！');
+	        }			
 	
-			$row = model("VerificationCode")->insert(array('telphone'=>$telphone,'verification_code'=>$code,'create_time'=>time(), 'ip'=>$ip));
-			if(!$row){
-				return $this->ajaxError('验证码写入错误，发送失败');
-			}
-	
-			$send = send_sms_reg($telphone, $code);
+			//调用阿里云短信接口成功后,插入到验证码数据库
+	        $send = send_sms($telphone, $code, $sms_cfg_var='code', $template_code=$alicloud['TemplateCode']);
 			list($status,$return_code,$sub_code) = $send;
-	
-			if($status){
-				return $this->ajaxSuccess('发送成功', 1, $arr=array());
+	        if($status){
+	        	model("VerificationCode")->insert(array('telphone' => $telphone, 'verification_code' => $code, 'create_time' => time(), 'ip'=>get_client_ip()));
+				return ajaxSuccess('发送成功', 1, $arr=array());
 			}else if(!$status && $sub_code=='isv.BUSINESS_LIMIT_CONTROL'){
-				return $this->ajaxError('您今天发送验证码的数量已超过限额！', 0, $arr=array());
+				return ajaxError('您今天发送验证码的数量已超过限额！', 0, $arr=array());
 			}else{
-				return $this->ajaxError('发送失败,'.$sub_code, 0 ,$arr=array());
+				return ajaxError('发送失败,'.$sub_code, 0 ,$arr=array());
 			}			
 		}
 	}
