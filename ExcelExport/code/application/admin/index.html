@@ -1,0 +1,41 @@
+<form class="layui-form" id="form-admin-add" action="">
+    <div class="layui-form-item">
+    <div class="layui-inline">
+        <select name="type" class="type">
+            <option value="">请选择查询方式</option>
+            <option value="1">操作URL</option>
+            <option value="2">用户昵称</option>
+            <option value="3">用户ID</option>
+        </select>
+    </div>
+    <div class="layui-inline">
+        <div class="layui-input-inline" style="width: 300px;">
+            <input type="text" name="keyword" placeholder="请输入关键词" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-inline">
+        <label style="width: 124px;" class="layui-form-label label-width" >日志时间：</label>
+        <div class="layui-input-inline" style="width: 300px;">
+            <input type="text" class="layui-input"  name="add_time" placeholder="请选择时间"  id="create_time" >
+        </div>
+    </div>
+    <div class="layui-inline">
+        <span class="layui-btn sub">查询</span>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+    <div class="layui-inline">
+        <span class="layui-btn layui-btn-normal export">导出报表</span>
+    </div>
+    <div class="layui-inline">
+        <button type="reset" class="layui-btn layui-btn-danger" id="batch_delete" data-url="/log/batchDelete" onclick="batchDelete()">批量删除</button>
+    </div>
+</form>
+
+<script>
+    $(document).on('click', '.export', function () {
+        var keyword = $('input[name=keyword]').val();
+        var type = $('.type').val();
+        var time = $('#create_time').val();
+        window.location.href = '/log/export?add_time='+time+'&keyword='+keyword+'&type='+type;
+    });	
+</script>
