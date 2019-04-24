@@ -9,6 +9,11 @@ class Log extends Base {
      * 
      */
     public function export(){
+    	
+		error_reporting(E_ALL);
+		ini_set('display_errors', TRUE);
+		ini_set('display_startup_errors', TRUE);    	
+    	
         $getInfo = input('get.');
         $where = [];
         if (!empty($getInfo['add_time'])) {
@@ -39,6 +44,7 @@ class Log extends Base {
         $list = model('UserAction')->where($where)->select();
 
         $row = 1;
+        //这里可能会报错
         $objPHPExcel->getActiveSheet()->mergeCells("A$row:E$row");
         $objPHPExcel->setActiveSheetIndex(0)->setCellValue("A$row",'操作日志报表');
         $objPHPExcel->setActiveSheetIndex(0)->setCellValue("A".($row+1),'用户ID');
@@ -88,5 +94,108 @@ class Log extends Base {
 
         echo 'ok';
         exit();
-    }	
+    }
+
+	/**
+	 * 
+	 * 导出
+	 * 
+	 */
+	public function outputExcel() {
+		if ($this->request->isGet()) {
+			
+			error_reporting(E_ALL);
+			ini_set('display_errors', TRUE);
+			ini_set('display_startup_errors', TRUE);	 
+			       
+			$product_name = input('get.product_name', '', 'trim');
+			$shop_id = input('get.shop_id', '', 'trim');	
+
+			$where = [];
+			if ($product_name != '') {
+				$where['product_name'] = ['like', '%'.$product_name.'%'];
+			}
+			
+			if ($shop_id != '') {
+				$where['shop_id'] = ['like', '%'.$shop_id.'%'];
+			}
+			
+	        $listInfo = model('Product')->where($where)->order('product_id desc')->select();	
+
+	        Vendor('phpexcel.PHPExcel');
+        	Vendor('PHPExcel.PHPExcel.Worksheet.Drawing');
+        	Vendor('PHPExcel.PHPExcel.Writer.Excel2007');
+        	Vendor('PHPExcel.PHPExcel.Writer.Excel5');
+       		$objExcel = new \PHPExcel();
+			$objWriter = \PHPExcel_IOFactory::createWriter($objExcel, 'Excel5');
+       		$objActSheet = $objExcel->getActiveSheet();
+       		$key = ord("A");
+       		$objExcel->getProperties()->setCreator('constantine')
+                ->setLastModifiedBy('constantine')
+                ->setTitle('线路管理_'.date("Y-m-d"))
+                ->setSubject('线路管理_'.date("Y-m-d"))
+                ->setDescription('constantine for Office 2007 XLSX, generated using PHP classes.')
+                ->setKeywords('office 2007 openxml php')
+                ->setCategory('Result file');
+                
+       		$letter =explode(',',"A,B,C,D,E,F,G");
+        	$arrHeader = array('序号','线路名称','线路单价（元）','销量','上架状态','线路开放时间','所属分类');
+       		
+        	$objExcel->getActiveSheet()->mergeCells("A1:G1");
+	        $objExcel->setActiveSheetIndex(0)->setCellValue("A1",'线路管理_'.date("Y-m-d"));
+        	
+	        //填充表头信息
+	        $lenth =  count($arrHeader);
+	        for($i = 0;$i < $lenth;$i++) {
+	            $objActSheet->setCellValue("$letter[$i]2","$arrHeader[$i]");
+	        };
+   		
+		    //填充表格信息
+		    if ($listInfo) {
+		        foreach($listInfo as $k=>$v){
+		            $k = $k + 3;
+		            
+	            	$v['marketable'] = P::$_tv_product['marketable'][$v['marketable']];
+	            	$v['product_date'] = $v['beg_date'].' - '.$v['end_date'];
+	            	$cate = model('Product')->getCateName($v['cate']); 		            
+		            
+		            $objActSheet->setCellValue('A'.$k,$v['product_id']);
+		            $objActSheet->setCellValue('B'.$k, $v['product_name']);
+		            $objActSheet->setCellValue('C'.$k, $v['price_adult']);
+		            $objActSheet->setCellValue('D'.$k, $v['total_buy']);
+		            $objActSheet->setCellValue('E'.$k, $v['marketable']);
+		            $objActSheet->setCellValue('F'.$k, $v['product_date']);
+		            $objActSheet->setCellValue('G'.$k, $cate);
+		            // 表格高度
+		            $objActSheet->getRowDimension($k)->setRowHeight(30);
+			        //设置居中
+			        $objExcel->getDefaultStyle()->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			        $objExcel->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER);		            
+		        }   
+		    }    		
+       		
+	        //设置表格的宽度
+	        $objActSheet->getColumnDimension('A')->setWidth("10");
+	        $objActSheet->getColumnDimension('B')->setWidth("80");
+	        $objActSheet->getColumnDimension('C')->setWidth("20");
+	        $objActSheet->getColumnDimension('D')->setWidth("20");
+	        $objActSheet->getColumnDimension('E')->setWidth("20");
+	        $objActSheet->getColumnDimension('F')->setWidth("30");
+	        $objActSheet->getColumnDimension('G')->setWidth("50");  		
+       		
+	        $outfile = "线路列表_".date('Y-m-d').'.xlsx';
+	        header("Content-Type: application/force-download");
+	        header("Content-Type: application/octet-stream");
+	        header("Content-Type: application/download");
+	        header('Content-Disposition:inline;filename="'.$outfile.'"');
+	        header("Content-Transfer-Encoding: binary");
+	        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+	        header("Pragma: no-cache");
+	        $objWriter->save('php://output');       		
+	
+	        echo 'ok';
+	        exit();	        		
+		}
+		
+	}    
 }

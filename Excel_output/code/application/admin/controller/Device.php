@@ -49,7 +49,7 @@ class Device extends Base {
 
 	        $strTable .= '</tr>';
 	
-	        if(is_array($data)){
+	        if($data){
 				$working_status = array('10'=>'工作','20'=>'空闲','30'=>'失效');
 	        	$status = ['10'=>'启用','20'=>'禁用'];
 	            foreach($data as $k=>$val){
@@ -70,6 +70,10 @@ class Device extends Base {
 	
 	                $strTable .= '</tr>';
 	            }
+	        } else {
+	        	$strTable .= '<tr>';
+	        	$strTable .= '<td colspan="11" style="text-align:center">没有数据</td>';
+	        	$strTable .= '</tr>';	        	
 	        }
 	
 	        $strTable .='</table>';
