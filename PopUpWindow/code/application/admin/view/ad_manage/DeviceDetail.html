@@ -1,0 +1,30 @@
+{include file="public/base" /}
+{include file="public/datetime" /}
+<block name="main">
+    <fieldset class="layui-elem-field">
+        <legend>广告所选设备列表</legend>
+        <div class="layui-field-box">
+            <table class="layui-table" id="list-admin" lay-even>
+                <thead>
+                <tr>
+                    <th>设备编号</th>
+                    <th>设备管理员</th>
+                    <th>设备所在地</th>
+                </tr>
+                </thead>
+				<tbody>
+					{volist name="list" id="vo"}
+						<tr>
+							<td>{$vo['code']}</td>
+							<td>{$vo['device_admin']}</td>
+							<td>{$vo['address']}</td>
+						</tr>
+					{/volist}
+				</tbody>
+            </table>
+        </div>
+    </fieldset>
+</block>
+<block name="myScript">
+
+</block>
